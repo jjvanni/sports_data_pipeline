@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: sdp_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${SDP_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SDP_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${SDP_POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  airbyte-db:
+    image: postgres:latest
+    container_name: sdp_airbyte_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${SDP_AIRBYTE_USER}
+      POSTGRES_PASSWORD: ${SDP_AIRBYTE_PASSWORD}
+      POSTGRES_DB: ${SDP_AIRBYTE_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - airbyte_db_data:/var/lib/postgresql/data
+
+  airbyte-server:
+    image: airbyte/server:latest
+    container_name: sdp_airbyte_server
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - airbyte-db
+
+  airbyte-webapp:
+    image: airbyte/webapp:latest
+    container_name: sdp_airbyte_webapp
+    restart: always
+    ports:
+      - "8001:8001"
+    depends_on:
+      - airbyte-server
+
+volumes:
+  pg_data:
+  airbyte_db_data:
